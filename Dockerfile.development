@@ -1,0 +1,14 @@
+FROM node:latest
+
+WORKDIR /app
+
+VOLUME /app/dist/
+
+COPY . .
+
+RUN npm install -g nodemon
+
+EXPOSE 3000
+
+CMD [ "nodemon", "-L", "--watch", "/app/dist", "--exec", "node dist/index.js" ]
+
