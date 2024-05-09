@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=supersecretverysecret
+      - POSTGRES_DB=test
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/seed.sql:ro
+
+  analytics-mock:
+    build:
+      context: ./misc/analytics-mock
+    ports:
+      - "8080:8080"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.development
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - analytics-mock
+    volumes:
+      - ./dist:/app/dist:ro
+    environment:
+      DATABASE_URL: postgres://postgres:supersecretverysecret@db/test
+
+volumes:
+   postgres-data:
+
+
