@@ -2,13 +2,13 @@
 
 ## Preamble
 
-Seeing as I'm new to Typescript and Node, I decided to use my time trying to identify as many issues as I could by just revoiewing the code and exercising the API via Postman a little.
+Seeing as I'm new to Typescript and Node, I decided to use my time trying to identify as many issues as I could by just reviewing the code and exercising the API via Postman a little.
 
 The following is a list of the issues I've spotted, but you'll have to forgive me if I missed any glaring TS bad pratice or coding conventions, as this isn't something I'm an expert on (yet!).
 
-Instead of making clumsy code changes I've just tried to detail as many issues as I could in this document, and I've made suggestions of the changes I would make (with more time and a quick crash course in good Typescript conventions). I hope this is OK.
+Instead of trying to make clumsy code changes I've just tried to detail as many issues as I could in this document, and I've made suggestions of the changes I would make (with more time and a quick crash course in good Typescript conventions). I hope this is OK.
 
-I'll hold my hands up now though, the process of setting up my development environment and reviewing/playing with the code definitely took me way over the allocated hour - apologies for this, I wasn't trying to cheat, I was just enjoying looking for errors in the code and lost track of time. Thank for taking the time to create this sample app, it's been a lot of fun to review.
+I'll hold my hands up now though, the process of setting up my development environment and reviewing/playing with the code definitely took me way over the allocated hour - apologies for this, I wasn't trying to cheat, I was just enjoying looking for errors in the code and lost track of time. Thanks for taking the time to create this sample app, it's been a lot of fun to review.
 
 ## Issues
 
@@ -16,13 +16,11 @@ I'll hold my hands up now though, the process of setting up my development envir
 
 - The API uses basic auth -  unencrypted (base64 encoded) user IDs and passwords are being sent in the request headers of every user request
 
-_There are several inherent and well-understood problems with using basic auth these days (like brute force attacks) and there are good alternatives available, like OAuth and JWT. I won't attempt to list them all here, but obviously implementing more robost authentication would be a good first step to improving the API._
+_There are several inherent and well-understood problems with using basic auth these days (like brute force attacks) and there are good alternatives available, like OAuth and JWT. I won't attempt to list them all here, but obviously implementing more robust authentication would be a good first step to improving the API._
 
-- There are no authorisation checks
+- There are no authorisation checks - the lack of complex authentication and non-existant authorisation checks allows for easy farming of user data from this API
 
 _Once authenticated, the system should check if the user is allowed to access the data they're requesting (authorisation). Currently there is no relationship between the authenticated user id (passed in the auth header) and the user id in the request, so any user can currently view the details and messages of any other user - when authenticated as Anya I shouldn't be able to access Jon's personal details or messages (or vice versa)._
-
-_The lack of complex authentication and non-existant authorisation checks allows for easy farming of user data from this API._
 
 - User IDs, usernames, passwords and email addresses (PII data) are all stored as plain text in the users database table. This is both a security risk for the API and a potential PII breach for our users. Message bodies are also stored as plain text, and could possibly hold sensitive/private data.
 
@@ -53,7 +51,7 @@ _The auth middleware needs to be imported and hooked up in users handler, replic
 
 - There is no validation/sanitisation of the values being submitted to the API 
 
-_This is particularly problematic where these values are being used directly in SQL queries, as it makes the API vulnerable to SQL injection attacks. It also means we're not handling normal bad requests nicely. All input values should be validated and sanitised as the first step in handling a request._
+_This is particularly problematic because these values are being used directly in SQL queries, making the API extremely vulnerable to SQL injection attacks. It also means we're not handling normal bad requests nicely, so will be allowing garbage into system. All input values should be validated and sanitised as the first step in handling a request._
 
 - SQL queries are defined in the route handlers directly
 
@@ -61,7 +59,7 @@ _This is a code smell, but may not be such an issue in Node apps. Personally, I 
 
 - The users 'search' endpoint is unreachable
 
-_The search endpoint is currently blocked due to the positioning of the GET endpoint that accepts a parameter at the top of the users handler (the /search path is being interpreted as a parameter and routed to this catch-all function). To resolve this, the search endpoint should be moved above the parameterised GET so it's evaluated first._
+_The search endpoint is currently unreachable due to the positioning of the GET endpoint that accepts a parameter at the top of the users handler (the /search path is being interpreted as a parameter and routed to this catch-all function). To resolve this, the search endpoint should be moved above the parameterised GET so it's evaluated first._
 
 - The users 'search' endpoint is non-functioning
 
